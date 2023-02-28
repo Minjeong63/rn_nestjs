@@ -11,24 +11,27 @@ const REDIRECT_URI = "http://192.168.0.8:19003/oauth/kakao";
 const INJECTED_JAVASCRIPT = `window.ReactNativeWebView.postMessage('카카오 로그인')`;
 
 const SignIn = ({ navigation }: any) => {
-  // AsyncStorage.removeItem("token");
   const url = Linking.useURL();
-
+  // 카카오 모달 오픈 여부
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
+  /**
+   * 카카오 로그인 버튼을 눌렀을 때  작동하는 함수
+   */
   const onKakaoLoginHandler = async () => {
     const isToken = await AsyncStorage.getItem("token");
     if (isToken) navigation.navigate("toDoList");
     else setModalVisible(true);
   };
 
+  // 백엔드에서 받은 url을 기준으로 회원가입과 메인 페이지로 구분
   useEffect(() => {
     if (url?.split("?id=")[0] === "exp://192.168.0.8:19000/--/signUp") {
       setModalVisible(false);
       navigation.navigate("signUp", { id: url.split("?id=")[1] });
     }
   }, [url]);
-  console.log("zsdfzsdf");
+
   return (
     <View className="flex-1 bg-black py-36 px-6">
       <View className="items-center mb-20">
@@ -51,7 +54,7 @@ const SignIn = ({ navigation }: any) => {
 
       {/* 카카오 로그인 모달 */}
       <Modal animationType="slide" visible={modalVisible}>
-        <View className="flex-1 my-8">
+        <View className="flex-1 my-8 mx-4">
           <WebView
             style={{ marginTop: 30, flex: 1 }}
             source={{
@@ -62,9 +65,9 @@ const SignIn = ({ navigation }: any) => {
             //   const data = event.nativeEvent.url;
             // }}
             // 아래 3개의 props를 주면 소셜 로그인 시 자동 로그인 되지 않음
-            // cacheMode={"LOAD_NO_CACHE"}
-            // cacheEnabled={false}
-            // incognito={true}
+            cacheMode={"LOAD_NO_CACHE"}
+            cacheEnabled={false}
+            incognito={true}
           />
         </View>
       </Modal>
