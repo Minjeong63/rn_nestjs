@@ -65,22 +65,6 @@ export default function ToDoList() {
 
   const onChangeText = (payload: string) => setText(payload);
 
-  // useEffect(() => {
-  //   lastTab();
-  // }, []);
-
-  /**
-   * app을 끄기 직전에 보고 있던 tab이 뭔지 구분해서 다음에 다시 app을 들어갈 때 그 탭을 보여주는 함수
-   */
-  // const lastTab = async () => {
-  //   try {
-  //     const tab = await AsyncStorage.getItem("tab");
-  //     setWorking(tab === "true" ? true : false);
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
-
   /**
    * 할 일 추가하는 함수
    * @returns
