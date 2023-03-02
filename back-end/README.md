@@ -18,5 +18,3 @@
 2. AppModule로 가서 imports 안에 ConfigModule.forRoot()를 넣어줌
 
 3. .env 안의 변수가 필요한 파일에 가서 process.env.[파일명] 으로 변수를 사용하면 됨
-
-## @Res 사용법
