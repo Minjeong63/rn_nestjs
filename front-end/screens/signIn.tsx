@@ -53,10 +53,7 @@ const SignIn = ({ navigation }: any) => {
         >
           <Text className="text-black text-2xl font-bold">카카오 로그인</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={onKakaoLoginHandler}
-          className="mt-4 mx-8 p-4 bg-green-600 rounded-lg items-center mb-8"
-        >
+        <TouchableOpacity className="mt-4 mx-8 p-4 bg-green-600 rounded-lg items-center mb-8">
           <Text className="text-white text-2xl font-bold">네이버 로그인</Text>
         </TouchableOpacity>
       </View>
@@ -73,10 +70,6 @@ const SignIn = ({ navigation }: any) => {
             // onMessage={(event: WebViewMessageEvent) => {
             //   const data = event.nativeEvent.url;
             // }}
-            // 아래 3개의 props를 주면 소셜 로그인 시 자동 로그인 되지 않음
-            // cacheMode={"LOAD_NO_CACHE"}
-            // cacheEnabled={false}
-            // incognito={true}
           />
         </View>
       </Modal>
