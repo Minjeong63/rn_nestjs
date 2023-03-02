@@ -12,6 +12,7 @@ import { Fontisto } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { Modal } from "react-native";
+import axios from "axios";
 
 /**
  * asyncstorage key값
@@ -19,91 +20,96 @@ import { Modal } from "react-native";
 const STORAGE_KEY = "@toDos";
 
 export default function ToDoList() {
-  const [working, setWorking] = useState<boolean>(true);
+  const [type, setType] = useState<string>("WORK");
   const [text, setText] = useState<string>("");
-  const [toDos, setToDos] = useState<any>({});
+  const [toDos, setToDos] = useState<any>([]);
   const [updateText, setUpdateText] = useState<string>("");
-  const [updateKey, setUpdateKey] = useState<string>("");
+  const [updateId, setUpdateId] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [change, setChange] = useState<number>(0);
+
+  /**
+   * AsyncStorage에서 token 불러오는 함수
+   * @returns
+   */
+  const tokenData = async () => {
+    const token = await AsyncStorage.getItem("token");
+    return token;
+  };
+
+  /**
+   * toDos를 목록에 보여주는 함수
+   */
+  const getTodos = async () => {
+    const token = await tokenData();
+    if (token) {
+      const toDos = await axios
+        .get(`http://192.168.0.8:19003/todo/${JSON.parse(token)["id"]}`)
+        .then((res) => res.data)
+        .catch((err) => console.log(err.response));
+      setToDos(toDos);
+    }
+  };
+
+  useEffect(() => {
+    getTodos();
+  }, [change]);
 
   const travel = async () => {
-    setWorking(false);
-    await AsyncStorage.setItem("tab", "false");
+    setType("TRAVEL");
   };
 
   const work = async () => {
-    setWorking(true);
-    await AsyncStorage.setItem("tab", "true");
+    setType("WORK");
   };
 
   const onChangeText = (payload: string) => setText(payload);
 
-  useEffect(() => {
-    loadToDos();
-    lastTab();
-  }, []);
+  // useEffect(() => {
+  //   lastTab();
+  // }, []);
 
   /**
    * app을 끄기 직전에 보고 있던 tab이 뭔지 구분해서 다음에 다시 app을 들어갈 때 그 탭을 보여주는 함수
    */
-  const lastTab = async () => {
-    try {
-      const tab = await AsyncStorage.getItem("tab");
-      setWorking(tab === "true" ? true : false);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  /**
-   * asyncstorage에 데이터 저장하는 함수
-   * @param toSave 저장할 데이터
-   */
-  const saveToDos = async (toSave: any) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-    } catch (e) {
-      alert("storage 저장 실패");
-    }
-  };
-
-  /**
-   * asyncstorage에 있는 데이터 불러오는 함수
-   */
-  const loadToDos = async () => {
-    try {
-      const data = await AsyncStorage.getItem(STORAGE_KEY);
-      data ? setToDos(JSON.parse(data)) : null;
-    } catch (e) {
-      alert("storage 불러오기 실패");
-    }
-  };
+  // const lastTab = async () => {
+  //   try {
+  //     const tab = await AsyncStorage.getItem("tab");
+  //     setWorking(tab === "true" ? true : false);
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
 
   /**
    * 할 일 추가하는 함수
    * @returns
    */
   const addToDo = async () => {
-    if (!text) return;
+    const token = await tokenData();
+    if (!text || !token) return;
     else {
-      // const newToDos = Object.assign({}, toDos, {
-      //   [Date.now()]: { text, work: working },
-      // });
-      const newToDos = {
-        ...toDos,
-        [Date.now()]: { text, working, isChecked: false },
+      const toDoData = {
+        id: JSON.parse(token)["id"],
+        content: text,
+        type: type,
+        complete: false,
       };
-      setToDos(newToDos);
-      await saveToDos(newToDos);
-      setText("");
+      await axios
+        .post("http://192.168.0.8:19003/todo", toDoData)
+        .then((res) => {
+          setText("");
+          setChange(change + 1);
+        })
+        .catch((err) => console.log(err));
     }
   };
 
   /**
    * 할 일 삭제하는 함수
-   * @param key 할 일을 추가한 시간
+   * @param id todo의 _id
    */
-  const deleteToDo = (key: string) => {
+  const deleteToDo = (id: string) => {
     Alert.alert("정말 삭제하시겠습니까?", "", [
       {
         text: "아니오",
@@ -113,12 +119,10 @@ export default function ToDoList() {
       {
         text: "예",
         onPress: async () => {
-          // const newToDos = Object.keys(toDos).map((el) => el !== key && toDos[el]);
-          const newToDos = { ...toDos };
-          delete newToDos[key];
-
-          setToDos(newToDos);
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newToDos));
+          await axios
+            .delete(`http://192.168.0.8:19003/todo/${id}`)
+            .then((res) => setChange(change + 1))
+            .catch((err) => console.log(err));
         },
       },
     ]);
@@ -129,29 +133,27 @@ export default function ToDoList() {
    * @param key 추가한 시간 값
    * @param isChecked 체크했는지 여부
    */
-  const checkToDo = async (key: string, isChecked: boolean) => {
-    if (!isChecked) {
-      const newToDos = { ...toDos, [key]: { ...toDos[key], isChecked: true } };
-      setToDos(newToDos);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newToDos));
-    } else {
-      const newToDos = { ...toDos, [key]: { ...toDos[key], isChecked: false } };
-      setToDos(newToDos);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newToDos));
-    }
+  const checkToDo = async (id: string, isCompleted: boolean) => {
+    await axios
+      .patch(`http://192.168.0.8:19003/todo/${id}`, { complete: !isCompleted })
+      .then((res) => setChange(change + 1));
   };
 
   /**
    * 할 일을 수정하는 함수
    */
   const updateToDo = async () => {
-    let newToDo = { ...toDos };
-    newToDo[updateKey].text = updateText;
-    setToDos(newToDo);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newToDo));
-    setUpdateKey("");
-    setUpdateText("");
-    setModalVisible(false);
+    await axios
+      .patch(`http://192.168.0.8:19003/todo/${updateId}`, {
+        content: updateText,
+      })
+      .then((res) => {
+        setChange(change + 1);
+        setUpdateText("");
+        setUpdateId("");
+        setModalVisible(false);
+      })
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -160,7 +162,7 @@ export default function ToDoList() {
         <TouchableOpacity onPress={work}>
           <Text
             className={
-              working
+              type === "WORK"
                 ? "text-5xl font-bold text-white"
                 : "text-5xl font-bold text-neutral-700"
             }
@@ -171,7 +173,7 @@ export default function ToDoList() {
         <TouchableOpacity onPress={travel}>
           <Text
             className={
-              !working
+              type !== "WORK"
                 ? "text-5xl font-bold text-white"
                 : "text-5xl font-bold text-neutral-700"
             }
@@ -187,68 +189,67 @@ export default function ToDoList() {
           returnKeyType="done"
           value={text}
           placeholder={
-            working ? "할 일을 추가해 보세요." : "어디로 가고 싶나요?"
+            type === "WORK" ? "할 일을 추가해 보세요." : "어디로 가고 싶나요?"
           }
           className="bg-white py-4 px-4 rounded my-4 text-xl"
         />
       </View>
       <ScrollView>
-        {toDos &&
-          Object.keys(toDos).map(
-            (key: string) =>
-              toDos[key].working === working && (
-                <View
-                  className="w-full flex-row items-center justify-between bg-neutral-700 mb-4 p-4 rounded"
-                  key={key}
-                >
-                  <View className="flex-row items-center w-4/5">
-                    <TouchableOpacity
-                      onPress={() => checkToDo(key, toDos[key].isChecked)}
-                    >
-                      {toDos[key].isChecked ? (
-                        <FontAwesome
-                          name="check-square-o"
-                          size={24}
-                          color="white"
-                        />
-                      ) : (
-                        <Feather name="square" size={24} color="white" />
-                      )}
-                    </TouchableOpacity>
-                    <Text
-                      className={
-                        toDos[key].isChecked
-                          ? "line-through text-neutral-400 text-base font-medium ml-4"
-                          : "text-white text-base font-medium ml-4"
-                      }
-                    >
-                      {toDos[key]["text"]}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center w-1/5 justify-end">
-                    {!toDos[key].isChecked && (
-                      <TouchableOpacity
-                        onPress={() => {
-                          setModalVisible(true);
-                          setUpdateKey(key);
-                        }}
-                      >
-                        <FontAwesome
-                          name="pencil-square-o"
-                          size={28}
-                          color="white"
-                        />
-                      </TouchableOpacity>
+        {toDos.map(
+          (el: any, idx: number) =>
+            el.type === type && (
+              <View
+                className="w-full flex-row items-center justify-between bg-neutral-700 mb-4 p-4 rounded"
+                key={idx}
+              >
+                <View className="flex-row items-center w-4/5">
+                  <TouchableOpacity
+                    onPress={() => checkToDo(el._id, el.complete)}
+                  >
+                    {el.complete ? (
+                      <FontAwesome
+                        name="check-square-o"
+                        size={24}
+                        color="white"
+                      />
+                    ) : (
+                      <Feather name="square" size={24} color="white" />
                     )}
-                    <View className="ml-4">
-                      <TouchableOpacity onPress={() => deleteToDo(key)}>
-                        <Fontisto name="trash" size={26} color="white" />
-                      </TouchableOpacity>
-                    </View>
+                  </TouchableOpacity>
+                  <Text
+                    className={
+                      el.complete
+                        ? "line-through text-neutral-400 text-base font-medium ml-4"
+                        : "text-white text-base font-medium ml-4"
+                    }
+                  >
+                    {el.content}
+                  </Text>
+                </View>
+                <View className="flex-row items-center w-1/5 justify-end">
+                  {!el.complete && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setModalVisible(true);
+                        setUpdateId(el._id);
+                      }}
+                    >
+                      <FontAwesome
+                        name="pencil-square-o"
+                        size={28}
+                        color="white"
+                      />
+                    </TouchableOpacity>
+                  )}
+                  <View className="ml-4">
+                    <TouchableOpacity onPress={() => deleteToDo(el._id)}>
+                      <Fontisto name="trash" size={26} color="white" />
+                    </TouchableOpacity>
                   </View>
                 </View>
-              )
-          )}
+              </View>
+            )
+        )}
       </ScrollView>
 
       <Modal animationType="slide" visible={modalVisible}>
@@ -257,6 +258,7 @@ export default function ToDoList() {
             <TextInput
               value={updateText}
               onChangeText={(e) => setUpdateText(e)}
+              onSubmitEditing={updateToDo}
               className="bg-white pt-4 pb-40 px-4 rounded my-4 text-xl"
               placeholder="수정하고 싶은 메세지를 입력해 주세요."
             />
