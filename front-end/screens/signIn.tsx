@@ -2,7 +2,7 @@ import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import WebView, { WebViewMessageEvent } from "react-native-webview";
+import WebView from "react-native-webview";
 import * as Linking from "expo-linking";
 import { useEffect } from "react";
 
@@ -17,6 +17,7 @@ const SignIn = ({ navigation }: any) => {
 
   /**
    * 카카오 로그인 버튼을 눌렀을 때  작동하는 함수
+   * asyncStorage에 토큰이 있다면 백엔드를 타지 않고 바로 main으로 뱉기
    */
   const onKakaoLoginHandler = async () => {
     const isToken = await AsyncStorage.getItem("token");
@@ -24,11 +25,19 @@ const SignIn = ({ navigation }: any) => {
     else setModalVisible(true);
   };
 
+  const makeToken = async (id: string) => {
+    await AsyncStorage.setItem("token", JSON.stringify({ id: id }));
+  };
+
   // 백엔드에서 받은 url을 기준으로 회원가입과 메인 페이지로 구분
   useEffect(() => {
+    setModalVisible(false);
     if (url?.split("?id=")[0] === "exp://192.168.0.8:19000/--/signUp") {
-      setModalVisible(false);
       navigation.navigate("signUp", { id: url.split("?id=")[1] });
+    }
+    if (url?.split("?id=")[0] === "exp://192.168.0.8:19000/--/main") {
+      makeToken(url.split("?id=")[1]);
+      navigation.navigate("toDoList");
     }
   }, [url]);
 
@@ -65,9 +74,9 @@ const SignIn = ({ navigation }: any) => {
             //   const data = event.nativeEvent.url;
             // }}
             // 아래 3개의 props를 주면 소셜 로그인 시 자동 로그인 되지 않음
-            cacheMode={"LOAD_NO_CACHE"}
-            cacheEnabled={false}
-            incognito={true}
+            // cacheMode={"LOAD_NO_CACHE"}
+            // cacheEnabled={false}
+            // incognito={true}
           />
         </View>
       </Modal>

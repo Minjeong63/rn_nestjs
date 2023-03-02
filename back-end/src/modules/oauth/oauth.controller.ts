@@ -1,8 +1,7 @@
 import { Controller, Get, Redirect, Req, Res, UseGuards } from '@nestjs/common';
 import { OauthService } from './oauth.service';
 import { Request, Response } from 'express';
-import { HttpService } from '@nestjs/axios';
-import { KakaoAuthGuard } from './kakao.guard';
+import { KakaoAuthGuard } from './kakao/kakao.guard';
 
 @Controller('oauth')
 export class OauthController {

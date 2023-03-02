@@ -1,17 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-
-const REST_API_KEY = '5dc50ab226c6121b6d5984501f093ece';
-const REDIRECT_URI = 'http://192.168.0.8:19003/oauth/kakao';
+import { UsersService } from '../users/users.service';
+import { User } from 'src/models/user.entity';
+import { InjectModel } from 'kindagoose';
 
 @Injectable()
 export class OauthService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly usersService: UsersService) {}
+
+  /**
+   * 카카오 소셜 로그인 정보를 받는 함수
+   * @param req
+   * @param res
+   */
   async oauthLogin(req: Request, res: Response) {
-    res.redirect(`exp://192.168.0.8:19000/--/signUp?id=${res.req.user['id']}`);
+    const user = await this.findUserById(res.req.user['id']);
+    if (!user)
+      res.redirect(
+        `exp://192.168.0.8:19000/--/signUp?id=${res.req.user['id']}`,
+      );
+    else
+      res.redirect(`exp://192.168.0.8:19000/--/main?id=${res.req.user['id']}`);
+  }
+
+  async findUserById(id: string) {
+    return await this.usersService.findUserById(id);
   }
 
   /**

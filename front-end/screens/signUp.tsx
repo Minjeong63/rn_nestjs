@@ -2,6 +2,7 @@ import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const SignUp = ({ route, navigation }: any) => {
   const [name, setName] = useState<string>("");
@@ -10,12 +11,20 @@ const SignUp = ({ route, navigation }: any) => {
   const onSignUpHandler = async () => {
     if (name && hpNum) {
       const tokenData = {
-        id: route.params.id,
+        id: String(route.params.id),
         name: name,
         hpNum: hpNum,
       };
-      await AsyncStorage.setItem("token", JSON.stringify(tokenData));
-      navigation.navigate("toDoList");
+      await axios
+        .post("http://192.168.0.8:19003/users", tokenData)
+        .then(async (res) => {
+          await AsyncStorage.setItem(
+            "token",
+            JSON.stringify({ id: tokenData.id })
+          );
+          navigation.navigate("toDoList");
+        })
+        .catch((err) => console.log("error!!!!", err.response));
     }
   };
 

@@ -1,12 +1,13 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { OauthController } from './oauth.controller';
 import { OauthService } from './oauth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtKakaoStrategy } from 'src/modules/oauth/kakao.strategy';
-import { HttpModule, HttpService } from '@nestjs/axios';
+import { JwtKakaoStrategy } from 'src/modules/oauth/kakao/kakao.strategy';
+import { HttpModule } from '@nestjs/axios';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [JwtModule.register({}), HttpModule],
+  imports: [JwtModule.register({}), HttpModule, UsersModule],
   controllers: [OauthController],
   providers: [OauthService, JwtKakaoStrategy],
 })
