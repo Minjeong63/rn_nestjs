@@ -14,11 +14,6 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Modal } from "react-native";
 import axios from "axios";
 
-/**
- * asyncstorage key값
- */
-const STORAGE_KEY = "@toDos";
-
 export default function ToDoList() {
   const [type, setType] = useState<string>("WORK");
   const [text, setText] = useState<string>("");
