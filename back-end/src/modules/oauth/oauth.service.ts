@@ -1,11 +1,6 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
-import { BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { catchError, firstValueFrom, map } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
 import { UsersService } from '../users/users.service';
-import { User } from 'src/models/user.entity';
-import { InjectModel } from 'kindagoose';
 
 @Injectable()
 export class OauthService {
