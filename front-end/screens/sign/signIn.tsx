@@ -20,7 +20,7 @@ const SignIn = ({ navigation }: any) => {
    */
   const onKakaoLoginHandler = async () => {
     const isToken = await AsyncStorage.getItem("token");
-    if (isToken) navigation.navigate("toDoList");
+    if (isToken) navigation.navigate("main");
     else setModalVisible(true);
   };
 
@@ -36,7 +36,7 @@ const SignIn = ({ navigation }: any) => {
     }
     if (url?.split("?id=")[0] === "exp://192.168.0.8:19000/--/main") {
       makeToken(url.split("?id=")[1]);
-      navigation.navigate("toDoList");
+      navigation.navigate("main");
     }
   }, [url]);
 

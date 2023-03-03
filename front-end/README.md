@@ -165,9 +165,16 @@ expo install expo-linking
 }</code></pre>
 
 5. 사용 방법
-<pre><code>import { URL } from '@env';</code></pre>
+<pre><code>import { URL } from '@env'</code></pre>
 
 ## watchman 에러 날 때
 
-1. watchman watch-del-all
-2. watchman shutdown-server
+- 아래 코드를 차례대로 입력
+<pre><code>watchman watch-del-all</code></pre>
+
+<pre><code>watchman shutdown-server</code></pre>
+
+## dayjs
+
+1. 설치 방법
+<pre><code>npm i dayjs</code></pre>
