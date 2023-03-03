@@ -132,3 +132,42 @@ expo install expo-linking
 
 - 앱이 시작한 후에 Linking.useURL()로 링크를 관찰할 수 있음
 - 초기 url과 url에 대한 후속 변경 사항을 반환함
+
+## 저장된 캐시 제거
+
+<pre><code>expo r -c</code></pre>
+
+## env 사용법
+
+1. 라이브러리 설치
+   <pre><code>npx expo react-native-dotenv</code></pre>
+   <pre><code>yarn add -D @types/react-native-dotenv</code></pre>
+
+2. babel.config.js 아래 코드 추가하기
+
+- moduleName은 import 할 때 명시한 이름으로 가져올 수 있도록 설정한 것
+   <pre><code>plugin: [['module:react-native-dotenv', {
+    moduleName: "@env", 
+    path: ".env"
+}]]</code></pre>
+
+3. .env 파일 생성
+
+- 세미콜론, 콤마 아무것도 사용하지 않음
+<pre><code>URL=http://naver.com</code></pre>
+
+4. .env.d.ts 파일 생성
+
+- 타입스크립트 환경에서는 env.d.ts 파일을 생성하고 사용하고자 하는 환경 변수 타입을 지정해야 함
+- 해당 파일과 내용을 추가하지 않으면, 환경 변수를 사용할 때 해당 변수를 찾을 수 없다고 오류가 발생하게 됨
+<pre><code>declare module '@env' {
+  export const API_URL: string;
+}</code></pre>
+
+5. 사용 방법
+<pre><code>import { URL } from '@env';</code></pre>
+
+## watchman 에러 날 때
+
+1. watchman watch-del-all
+2. watchman shutdown-server

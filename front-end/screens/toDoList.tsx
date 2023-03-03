@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { Modal } from "react-native";
 import axios from "axios";
+import { BACKEND } from "@env";
 
 export default function ToDoList() {
   const [type, setType] = useState<string>("WORK");
@@ -39,7 +40,7 @@ export default function ToDoList() {
     const token = await tokenData();
     if (token) {
       const toDos = await axios
-        .get(`http://192.168.0.8:19003/todo/${JSON.parse(token)["id"]}`)
+        .get(`${BACKEND}/todo/${JSON.parse(token)["id"]}`)
         .then((res) => res.data)
         .catch((err) => console.log(err.response));
       setToDos(toDos);
@@ -75,7 +76,7 @@ export default function ToDoList() {
         complete: false,
       };
       await axios
-        .post("http://192.168.0.8:19003/todo", toDoData)
+        .post(`${BACKEND}/todo`, toDoData)
         .then((res) => {
           setText("");
           setChange(change + 1);
@@ -99,7 +100,7 @@ export default function ToDoList() {
         text: "예",
         onPress: async () => {
           await axios
-            .delete(`http://192.168.0.8:19003/todo/${id}`)
+            .delete(`${BACKEND}/todo/${id}`)
             .then((res) => setChange(change + 1))
             .catch((err) => console.log(err));
         },
@@ -114,7 +115,7 @@ export default function ToDoList() {
    */
   const checkToDo = async (id: string, isCompleted: boolean) => {
     await axios
-      .patch(`http://192.168.0.8:19003/todo/${id}`, { complete: !isCompleted })
+      .patch(`${BACKEND}/todo/${id}`, { complete: !isCompleted })
       .then((res) => setChange(change + 1));
   };
 
@@ -123,7 +124,7 @@ export default function ToDoList() {
    */
   const updateToDo = async () => {
     await axios
-      .patch(`http://192.168.0.8:19003/todo/${updateId}`, {
+      .patch(`${BACKEND}/todo/${updateId}`, {
         content: updateText,
       })
       .then((res) => {
@@ -174,7 +175,7 @@ export default function ToDoList() {
         />
       </View>
       <ScrollView>
-        {toDos.map(
+        {toDos?.map(
           (el: any, idx: number) =>
             el.type === type && (
               <View

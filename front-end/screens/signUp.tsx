@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { BACKEND } from "@env";
 
 const SignUp = ({ route, navigation }: any) => {
   const [name, setName] = useState<string>("");
@@ -16,7 +17,7 @@ const SignUp = ({ route, navigation }: any) => {
         hpNum: hpNum,
       };
       await axios
-        .post("http://192.168.0.8:19003/users", tokenData)
+        .post(`${BACKEND}/users`, tokenData)
         .then(async (res) => {
           await AsyncStorage.setItem(
             "token",
@@ -24,7 +25,7 @@ const SignUp = ({ route, navigation }: any) => {
           );
           navigation.navigate("toDoList");
         })
-        .catch((err) => console.log("error!!!!", err.response));
+        .catch((err) => err);
     }
   };
 

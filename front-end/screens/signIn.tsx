@@ -5,10 +5,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import WebView from "react-native-webview";
 import * as Linking from "expo-linking";
 import { useEffect } from "react";
+import { REDIRECT_URI, REST_API_KEY } from "@env";
 
-const REST_API_KEY = "5dc50ab226c6121b6d5984501f093ece";
-const REDIRECT_URI = "http://192.168.0.8:19003/oauth/kakao";
-const INJECTED_JAVASCRIPT = `window.ReactNativeWebView.postMessage('카카오 로그인')`;
+// const INJECTED_JAVASCRIPT = `window.ReactNativeWebView.postMessage('카카오 로그인')`;
 
 const SignIn = ({ navigation }: any) => {
   const url = Linking.useURL();
