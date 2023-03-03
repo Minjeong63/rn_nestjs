@@ -14,6 +14,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Modal } from "react-native";
 import axios from "axios";
 import { BACKEND } from "@env";
+import { tokenData } from "../../utils/functions";
 
 export default function ToDoList() {
   const [type, setType] = useState<string>("WORK");
@@ -25,15 +26,6 @@ export default function ToDoList() {
   const [change, setChange] = useState<number>(0);
 
   /**
-   * AsyncStorage에서 token 불러오는 함수
-   * @returns
-   */
-  const tokenData = async () => {
-    const token = await AsyncStorage.getItem("token");
-    return token;
-  };
-
-  /**
    * toDos를 목록에 보여주는 함수
    */
   const getTodos = async () => {
@@ -42,7 +34,7 @@ export default function ToDoList() {
       const toDos = await axios
         .get(`${BACKEND}/todo/${JSON.parse(token)["id"]}`)
         .then((res) => res.data)
-        .catch((err) => console.log(err.response));
+        .catch((err) => err);
       setToDos(toDos);
     }
   };
