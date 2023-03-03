@@ -73,7 +73,6 @@ export class OauthService {
   //       }),
   //     ),
   //   );
-  //   console.log(response);
   //   return response;
   // } catch (e) {
   //   throw new BadRequestException();

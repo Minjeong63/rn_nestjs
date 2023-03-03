@@ -36,7 +36,6 @@ export class AttendanceService {
   }
 
   async patchTimeById(timeList: TimeList, id: string) {
-    console.log('timeList', timeList);
     const data = await this.getTimeList(id);
     if (!data) throw new BadRequestException();
     const datas = {
